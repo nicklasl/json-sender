@@ -5,8 +5,9 @@
 # Home page
 GET     /                           controllers.Application.index
 POST    /login                      controllers.Application.login
-GET     /api/:docName                   controllers.Application.getDocument(docName:String)
-POST    /api/:docName                   controllers.Application.addDocument(docName:String)
+GET     /api/:docName               controllers.Application.getDocument(docName:String)
+POST    /api/:docName               controllers.Application.addDocument(docName:String)
+PUT     /api/:docName               controllers.Application.replaceDocument(docName:String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

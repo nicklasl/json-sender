@@ -1,7 +1,13 @@
-@(message: String)
+@(urls: List[String])
 
-@main("Welcome to Play") {
+@main("json-sender") {
 
-    @play20.welcome(message)
+<h2>Currently serving the following URLs</h2>
+<ul>
+    @for(url <- urls){
+        <li><a href="/api/">@url</a></li>
+    }
+</ul>
+
 
 }

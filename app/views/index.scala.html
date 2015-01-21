@@ -2,12 +2,12 @@
 
 @main("json-sender") {
 
-<h2>Currently serving the following URLs</h2>
-<ul>
-    @for(url <- urls){
-        <li><a href="/api/">@url</a></li>
-    }
-</ul>
+    <h2>Currently serving the following URLs</h2>
+    <ul>
+        @for(url <- urls){
+            <li><a href="/api/@url">@url</a></li>
+        }
+    </ul>
 
 
 }

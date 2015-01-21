@@ -3,6 +3,7 @@ package controllers
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import play.api.{Logger, Configuration, Play}
+import util.LoggedInAction
 
 import scala.collection.mutable
 
@@ -39,8 +40,9 @@ object Application extends Controller {
     }.getOrElse(NotFound)
   }
 
-  def addDocument(docName: String) = Action {
+  def addDocument(docName: String) = LoggedInAction {
     implicit request =>
+      Logger.debug(s"addDocument as ${request.username}")
       if (memory.get(docName).isDefined) {
         BadRequest("duplicate name, use PUT to replace.")
       } else {
@@ -52,13 +54,20 @@ object Application extends Controller {
       }
   }
 
-  def replaceDocument(docName: String) = Action {
+  def replaceDocument(docName: String) = LoggedInAction {
     implicit request =>
+      Logger.debug(s"replaceDocument as ${request.username}")
       request.body.asJson.map {
         json =>
           memory.put(docName, json)
           Ok
       }.getOrElse(BadRequest)
+  }
+
+  def logout = LoggedInAction {
+    implicit request =>
+      Logger.debug(s"Logging out ${request.username}")
+      Ok.withNewSession
   }
 
   private def valid(username: String, password: String): Boolean = {

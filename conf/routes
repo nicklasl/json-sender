@@ -5,6 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 POST    /login                      controllers.Application.login
+POST    /logout                     controllers.Application.logout
 GET     /api/:docName               controllers.Application.getDocument(docName:String)
 POST    /api/:docName               controllers.Application.addDocument(docName:String)
 PUT     /api/:docName               controllers.Application.replaceDocument(docName:String)

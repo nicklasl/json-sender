@@ -1,1 +1,1 @@
-web:    play start --http.port=$PORT $PLAY_OPTS
+web:    activator run --http.port=$PORT $PLAY_OPTS

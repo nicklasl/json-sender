@@ -2,7 +2,8 @@ package controllers
 
 import play.api.libs.json.JsValue
 import play.api.mvc._
-import play.api.{Logger, Configuration, Play}
+import play.api.{Configuration, Logger, Play}
+import play.mvc.Http.MimeTypes
 import util.LoggedInAction
 
 import scala.collection.mutable
@@ -36,7 +37,7 @@ object Application extends Controller {
 
   def getDocument(docName: String) = Action {
     memory.get(docName).map { json =>
-      Ok(json).as("application/json")
+      Ok(json).as(MimeTypes.JSON)
     }.getOrElse(NotFound)
   }
 

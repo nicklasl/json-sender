@@ -1,19 +1,16 @@
 package controllers
 
-import play.api.libs.json.JsValue
+import play.api.Logger
 import play.api.mvc._
-import play.api.{Configuration, Logger, Play}
 import play.mvc.Http.MimeTypes
 import util.LoggedInAction
 
-import scala.collection.mutable
-
 object Application extends Controller {
 
-  val memory: mutable.Map[String, JsValue] = new mutable.HashMap[String, JsValue]()
+  val storage: StorageFacade = new StorageFacadeImpl()
 
   def index = Action {
-    val urls = memory.keys.toList
+    val urls = storage.keys
     Logger.debug(s"urls=$urls")
     Ok(views.html.index(urls))
   }
@@ -27,7 +24,7 @@ object Application extends Controller {
           val maybePassword: Option[String] = json.\("password").asOpt[String]
           (maybeUsername, maybePassword) match {
             case (Some(username), Some(password)) => {
-              if (valid(username, password)) Ok.withSession(Session(Map("user" -> username)))
+              if (PasswordValidator.valid(username, password)) Ok.withSession(Session(Map("user" -> username)))
               else Forbidden
             }
             case _ => Forbidden
@@ -36,7 +33,7 @@ object Application extends Controller {
   }
 
   def getDocument(docName: String) = Action {
-    memory.get(docName).map { json =>
+    storage.get(docName).map { json =>
       Ok(json).as(MimeTypes.JSON)
     }.getOrElse(NotFound)
   }
@@ -44,12 +41,12 @@ object Application extends Controller {
   def addDocument(docName: String) = LoggedInAction {
     implicit request =>
       Logger.debug(s"addDocument as ${request.username}")
-      if (memory.get(docName).isDefined) {
+      if (storage.get(docName).isDefined) {
         BadRequest("duplicate name, use PUT to replace.")
       } else {
         request.body.asJson.map {
           json =>
-            memory.put(docName, json)
+            storage.put(docName, json)
             Ok
         }.getOrElse(BadRequest)
       }
@@ -60,7 +57,7 @@ object Application extends Controller {
       Logger.debug(s"replaceDocument as ${request.username}")
       request.body.asJson.map {
         json =>
-          memory.put(docName, json)
+          storage.put(docName, json)
           Ok
       }.getOrElse(BadRequest)
   }
@@ -71,11 +68,4 @@ object Application extends Controller {
       Ok.withNewSession
   }
 
-  private def valid(username: String, password: String): Boolean = {
-    val logins: Seq[Configuration] = Play.current.configuration.getConfigSeq("logins").get
-    val option: Option[Configuration] = logins.find(entry => entry.getString("username").getOrElse("").equalsIgnoreCase(username))
-    option.exists(conf => if (conf.getString("password").exists(p => p.equalsIgnoreCase(password))) {
-      true
-    } else false)
-  }
 }

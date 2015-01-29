@@ -1,24 +1,18 @@
 package controllers
 
+import play.api.Logger
 import play.api.Play.current
 import play.api.db.DB
 import play.api.mvc._
-import play.api.{Logger, Play}
 import play.mvc.Http.MimeTypes
 import util.LoggedInAction
 
 object Application extends Controller {
 
-  val storage: StorageFacade = new StorageFacadeImpl()
+  val storage: StorageFacade = new DbStorage
 
   def index = Action {
     val urls = storage.keys
-    Logger.debug(s"urls=$urls")
-    Logger.debug(s"Got a db.default.url=${Play.configuration.getString("db.default.url")}")
-    DB.withConnection {
-      connection =>
-        Logger.debug(s"Got a db connection: $connection")
-    }
     Ok(views.html.index(urls))
   }
 

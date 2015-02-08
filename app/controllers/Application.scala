@@ -1,17 +1,18 @@
 package controllers
 
 import play.api.Logger
+import play.api.Play.current
+import play.api.db.DB
 import play.api.mvc._
 import play.mvc.Http.MimeTypes
 import util.LoggedInAction
 
 object Application extends Controller {
 
-  val storage: StorageFacade = new StorageFacadeImpl()
+  val storage: StorageFacade = new DbStorage
 
   def index = Action {
     val urls = storage.keys
-    Logger.debug(s"urls=$urls")
     Ok(views.html.index(urls))
   }
 

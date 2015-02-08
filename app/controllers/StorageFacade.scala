@@ -1,7 +1,6 @@
 package controllers
 
 import anorm._
-import play.api.Logger
 import play.api.Play.current
 import play.api.db.DB
 import play.api.libs.json.{JsValue, Json}
@@ -33,15 +32,13 @@ class DbStorage extends StorageFacade {
 
   override def keys: List[String] = DB.withConnection {
     implicit connection =>
-      Logger.debug(s"keys: Got a db connection: $connection")
-      SQL("SELECT name FROM document").executeQuery().as(stringParser *)
+      SQL("SELECT name FROM document").as(stringParser *)
   }
 
   override def get(key: String): Option[JsValue] = DB.withConnection {
     implicit connection =>
-      SQL("SELECT doc FROM document WHERE name = {name}").on('name -> key).as(jsParser *)
-      Logger.debug(s"get: Got a db connection: $connection")
-      None
+      val jsValues: List[JsValue] = SQL("SELECT doc FROM document WHERE name = {name}").on('name -> key).as(jsParser *)
+      jsValues.headOption
   }
 
   override def put(key: String, value: JsValue): Option[JsValue] = DB.withConnection {
@@ -52,8 +49,8 @@ class DbStorage extends StorageFacade {
       val sql = SQL("insert into document(name, doc) values ({name}, {doc})")
         .on("name" -> key)
         .on("doc" -> anorm.Object(pgObject))
-      Logger.debug(s"put: Got a db connection: $connection")
-      None
+      sql.executeUpdate()
+      get(key)
   }
 
   implicit def rowToJsValue: Column[JsValue] = Column.nonNull { (value, meta) =>
